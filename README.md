@@ -1,2 +1,124 @@
-# SpitWise-Automation
+# Splitwise WhatsApp Reminder Bot 🤖💸
 
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Splitwise WhatsApp Reminder Bot** is a Python-based automation tool that helps you recover lent money without the awkward "hey, you owe me" conversation. It connects to the Splitwise API to fetch outstanding balances and automatically sends a polite, personalized reminder to your friends via WhatsApp.
+
+---
+
+## 🚀 Features
+
+-   **Real-time Balance Sync:** Fetches the most recent "You are owed" data directly from Splitwise.
+-   **Automated Messaging:** Uses `pywhatkit` to automate WhatsApp Web messaging.
+-   **Smart Mapping:** Maps Splitwise names to phone numbers via a configurable dictionary.
+-   **Currency Aware:** Automatically detects and mentions the currency (CAD, USD, INR, etc.) of the debt.
+-   **Robust Error Handling:** Includes logging and safety checks to prevent script crashes.
+
+---
+
+## 🛠️ Prerequisites
+
+Before running this bot, ensure you have the following:
+
+1.  **Python 3.8+** installed on your system.
+2.  **Splitwise API Key:**
+    -   Go to [Splitwise Apps](https://secure.splitwise.com/apps/new).
+    -   Register a new application to get your **API Key (Personal Access Token)**.
+3.  **WhatsApp Web:**
+    -   You must be logged into [WhatsApp Web](https://web.whatsapp.com/) in your default browser (Chrome/Edge/Firefox).
+
+---
+
+## 📦 Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/splitwise-whatsapp-bot.git
+    cd splitwise-whatsapp-bot
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Setup Environment Variables:**
+    Create a `.env` file in the root directory:
+    ```env
+    SPLITWISE_API_KEY=your_actual_token_here
+    ```
+
+4.  **Configure the Phone Book:**
+    Open `main.py` and update the `PHONE_BOOK` dictionary with your friends' first names and phone numbers (including country codes):
+    ```python
+    PHONE_BOOK = {
+        "Alex": "+13479537392",
+        "john": "+1234567890"
+    }
+    ```
+
+---
+
+## 🚀 Usage
+
+Simply run the script:
+```bash
+python main.py
+```
+
+**Note:** The script will open a browser tab for each message. It will wait for a few seconds (default 20s) to allow WhatsApp Web to load before typing and sending the message automatically.
+
+---
+
+## 📁 Project Structure
+
+```text
+├── main.py              # Main logic & API handling
+├── .env                 # API Keys (DO NOT UPLOAD TO GITHUB)
+├── .gitignore           # Tells GitHub which files to ignore
+├── requirements.txt     # List of dependencies
+└── README.md            # Project documentation
+```
+
+---
+
+## 🛡️ Security Note
+
+**Never commit your `.env` file!** This project uses `python-dotenv` to keep your API keys safe locally. The `.gitignore` file is pre-configured to ignore `.env` to prevent accidental leaks of your Splitwise credentials.
+
+---
+
+## 🗺️ Roadmap & Future Improvements
+
+-   [ ] **Database Support:** Store phone numbers in a SQLite database instead of a hardcoded dictionary.
+-   [ ] **Headless Messaging:** Integrate with the Twilio API for background messaging without opening a browser.
+-   [ ] **Automatic Scheduling:** Add a feature to run the bot automatically every weekend.
+-   [ ] **Multi-Currency Totaling:** Convert all debts to a base currency (like CAD) using a live exchange rate API.
+
+---
+
+## 👤 Author
+
+**Siddh Bhadani**
+-   GitHub: [@your-username](https://github.com/your-username)
+-   LinkedIn: [Siddh Bhadani](https://linkedin.com/in/your-profile)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+***
+
+### How to use this on GitHub:
+1.  Copy the text above.
+2.  Create a new file in your project folder named `README.md`.
+3.  Paste the text and save.
+4.  Remember to also create a `requirements.txt` file with these lines:
+    ```text
+    requests
+    python-dotenv
+    pywhatkit
+    ```
