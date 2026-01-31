@@ -101,8 +101,8 @@ python main.py
 ## 👤 Author
 
 **Siddh Bhadani**
--   GitHub: [@your-username](https://github.com/your-username)
--   LinkedIn: [Siddh Bhadani](https://linkedin.com/in/your-profile)
+-   GitHub: [@Siddh07](https://github.com/siddh-07)
+-   LinkedIn: [Siddh Bhadani](https://www.linkedin.com/in/bhadani-siddh-15953a249/)
 
 ---
 
@@ -111,14 +111,3 @@ python main.py
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ***
-
-### How to use this on GitHub:
-1.  Copy the text above.
-2.  Create a new file in your project folder named `README.md`.
-3.  Paste the text and save.
-4.  Remember to also create a `requirements.txt` file with these lines:
-    ```text
-    requests
-    python-dotenv
-    pywhatkit
-    ```
