@@ -30,7 +30,16 @@ BASE_URL = "https://secure.splitwise.com/api/v3.0"
 # Phone number mapping: { "first_name": "phone_number" }
 # Ensure phone numbers include the country code (e.g., +1 for Canada/US)
 PHONE_BOOK = {
-    "dhruvil": "+13063513984"
+    "dhruvil": "+13063513984",
+    "shruti" : "+13065910739",
+    "nency" : "+12269665306",
+    "shubham" : "+13063515391",
+    "kishan" : "+17069888641",
+    "aelis" : "+14036677314",
+    "namra" : "+13065511646",
+    "nikhil" : "+16395548188",
+    "tarang" : "+16479964497",
+    "jimit" : "+16478773878",
 }
 
 if not API_KEY:
@@ -86,7 +95,6 @@ def main():
         return
 
     for friend in friends:
-        # A friend can have multiple balances in different currencies
         balances = friend.get("balance", [])
         
         for balance in balances:
@@ -94,24 +102,26 @@ def main():
                 amount = float(balance.get("amount", 0))
                 currency = balance.get("currency_code", "CAD")
                 
-                # Logic: Positive amount means they owe YOU.
                 if amount > 0:
-                    first_name = friend.get("first_name", "").lower()
-                    full_name = f"{friend.get('first_name')} {friend.get('last_name')}"
+                    # Use .get(key) or "" to ensure we never have a 'None' type
+                    first_name = friend.get("first_name") or "Friend"
+                    last_name = friend.get("last_name") or ""
                     
-                    phone_no = PHONE_BOOK.get(first_name)
+                    # F-strings are safer than using "+" for concatenation
+                    full_name = f"{first_name} {last_name}".strip()
+                    name_key = first_name.lower()
+                    
+                    phone_no = PHONE_BOOK.get(name_key)
                     
                     if phone_no:
-                        msg = generate_message(friend.get('first_name'), amount, currency)
+                        msg = generate_message(first_name, amount, currency)
                         send_whatsapp_reminder(phone_no, msg, full_name)
                     else:
                         logging.warning(f"No phone number mapped for {full_name}. Skipping.")
                 
-                elif amount < 0:
-                    logging.info(f"Note: You owe {friend.get('first_name')} {abs(amount)} {currency}.")
-            
-            except (ValueError, TypeError) as e:
-                logging.error(f"Error parsing balance for {friend.get('first_name')}: {e}")
+            except Exception as e:
+                # This will now catch the error and tell you exactly what went wrong
+                logging.error(f"Error processing balance for {friend.get('first_name', 'Unknown')}: {e}")
 
 if __name__ == "__main__":
     logging.info("Starting Splitwise Reminder Bot...")
