@@ -174,5 +174,6 @@ if __name__ == "__main__":
     logging.info("Starting Splitwise Reminder Bot...")
     main()
     with open("PyWhatKit_DB.txt", "w") as file:
-        file.clear()
+        file.seek(0)    
+        file.truncate(0)  
     logging.info("Process completed.")
