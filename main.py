@@ -5,6 +5,7 @@ Description: Fetches outstanding balances from Splitwise API and sends
              automated WhatsApp reminders to friends who owe money.
 """
 
+import filecmp
 import json
 import os
 import sys
@@ -113,7 +114,6 @@ def send_whatsapp_reminder(phone_no: str, message: str, friend_name: str):
         logging.debug(e)
 
 # ================== MAIN EXECUTION ==================
-
 def main():
     if not API_KEY:
         logging.critical("SPLITWISE_API_KEY missing in .env")
@@ -121,62 +121,58 @@ def main():
 
     # Load data from external JSON
     phone_book = load_phone_book(FRIENDS_FILE)
+    
+    # DEBUG: See what names were actually loaded
+    logging.info(f"Phone book loaded with keys: {list(phone_book.keys())}")
+
     if not phone_book:
-        logging.error("Phone book is empty. Exiting.")
+        logging.error("Phone book is empty or friends.json is missing. Exiting.")
         return
 
     friends = get_splitwise_friends()
-    
-    if not friends:
-        logging.warning("No friends found or API error occurred.")
-        return
-    
-    sent_users: set[str] = set()
+    sent_users: Set[str] = set()
     messages_sent = 0
 
     for friend in friends:
         if messages_sent >= MAX_MESSAGES_PER_RUN:
-            logging.info("Message limit reached. Stopping.")
+            logging.info("Run limit reached for this session.")
             break
 
         first_name = (friend.get("first_name") or "").strip()
+        last_name = (friend.get("last_name") or "").strip()
         name_key = first_name.lower()
+        full_name = f"{first_name} {last_name}".strip()
         
-        if not first_name:
+        if not first_name or name_key in sent_users:
             continue
 
-        name_key = first_name.lower()
-        balances = friend.get("balances", [])
-
-        if name_key in sent_users:
-            continue  # SECURITY: no duplicate reminders
-
-        phone_no = phone_book.get(name_key)
-        if not phone_no:
-            logging.warning(f"No phone number for {first_name}.")
-            continue
-        
-        for balance in balances:
+        # Check balances FIRST
+        for balance in friend.get("balance", []):
             try:
                 amount = float(balance.get("amount", 0))
                 currency = balance.get("currency_code", "CAD")
                 
-                if amount > 0:
+                # Only look for a phone number if they owe you money (> 0)
+                if amount > 0.01: # Check for more than 1 cent
+                    phone_no = phone_book.get(name_key)
+                    
                     if phone_no:
-                        message = generate_message(first_name, amount, currency)
-                        send_whatsapp_reminder(phone_no, message, first_name)
+                        msg = generate_message(first_name, amount, currency)
+                        send_whatsapp_reminder(phone_no, msg, full_name)
                         
                         sent_users.add(name_key)
                         messages_sent += 1
-                        break # Only one message per friend
+                        break # Only send one message per friend
                     else:
-                        logging.warning(f"No phone number mapped for {first_name}. Skipping.")
+                        # Only warn if they owe money but have no phone number
+                        logging.warning(f"ACTION REQUIRED: {full_name} owes {amount} {currency}, but no phone number found in friends.json.")
                 
             except Exception as e:
-                # This will now catch the error and tell you exactly what went wrong
-                logging.error(f"Error processing balance for {friend.get('first_name', 'Unknown')}: {e}")
+                logging.error(f"Error processing balance for {first_name}: {e}")
 
 if __name__ == "__main__":
     logging.info("Starting Splitwise Reminder Bot...")
     main()
+    with open("PyWhatKit_DB.txt", "w") as file:
+        file.clear()
     logging.info("Process completed.")
