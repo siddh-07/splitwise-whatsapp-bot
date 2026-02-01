@@ -5,6 +5,7 @@ Description: Fetches outstanding balances from Splitwise API and sends
              automated WhatsApp reminders to friends who owe money.
 """
 
+import json
 import os
 import sys
 import logging
@@ -27,32 +28,37 @@ load_dotenv()
 # Environment Variables
 API_KEY = os.getenv("SPLITWISE_API_KEY")
 BASE_URL = "https://secure.splitwise.com/api/v3.0"
+FRIENDS_FILE = "friends.json"
 
 # SECURITY: Hard cap to prevent spam
 MAX_MESSAGES_PER_RUN = 5
 MESSAGE_DELAY_SECONDS = 20  # SECURITY: rate limiting
-
-# Phone number mapping: { "first_name": "phone_number" }
-# Ensure phone numbers include the country code (e.g., +1 for Canada/US)
-PHONE_BOOK:Dict[str,str] = {
-    "dhruvil": "+13065396253",
-    # "dhruvil": "+13063513984",
-    # "shruti" : "+13065910739",
-    # "nency" : "+12269665306",
-    # "shubham" : "+13063515391",
-    # "kishan" : "+17069888641",
-    # "aelis" : "+14036677314",
-    # "namra" : "+13065511646",
-    # "nikhil" : "+16395548188",
-    # "tarang" : "+16479964497",
-    # "jimit" : "+16478773878",
-}
 
 # ================== VALIDATION ==================
 
 if not API_KEY:
     logging.critical("Invalid or missing SPLITWISE_API_KEY in .env file.")
     sys.exit(1)
+
+# ================== DATA LOADING ==================
+
+def load_phone_book(file_path: str) -> Dict[str, str]:
+    """Loads phone numbers from a JSON file and normalizes keys to lowercase."""
+    if not os.path.exists(file_path):
+        logging.error(f"Configuration file '{file_path}' not found!")
+        return {}
+    
+    try:
+        with open(file_path, "r") as f:
+            data = json.load(f)
+            # Ensure all keys are lowercase for consistent matching
+            return {str(k).lower(): str(v) for k, v in data.items()}
+    except json.JSONDecodeError:
+        logging.error(f"Invalid JSON format in {file_path}")
+        return {}
+    except Exception as e:
+        logging.error(f"Could not load phone book: {e}")
+        return {}
 
 # ================== CORE FUNCTIONS ==================
 
@@ -61,11 +67,10 @@ def get_splitwise_friends() -> List[Dict[str, Any]]:
     headers = {"Authorization": f"Bearer {API_KEY}"}
     try:
         response = requests.get(f"{BASE_URL}/get_friends", headers=headers, timeout=10)
-        response.raise_for_status()  # Raises error for 4xx or 5xx status codes
+        response.raise_for_status()  
         return response.json().get("friends", [])
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to connect to Splitwise API: {e}")
-        logging.debug(e)
         return []
 
 
@@ -96,13 +101,13 @@ def send_whatsapp_reminder(phone_no: str, message: str, friend_name: str):
         pywhatkit.sendwhatmsg_instantly(
             phone_no=phone_no,
             message=message,
-            wait_time=20,  # Increased to 20s for better reliability on slower PCs
+            wait_time=15,  # Increased to 20s to 25s for better reliability on slower PCs
             tab_close=True,
             close_time=3
         )
         logging.info(f"Successfully queued WhatsApp message for {friend_name}.")
 
-        time.sleep(MESSAGE_DELAY_SECONDS)  # SECURITY: rate limit
+        time.sleep(MESSAGE_DELAY_SECONDS) 
     except Exception as e:
         logging.error(f"WhatsApp automation failed for {friend_name}: {e}")
         logging.debug(e)
@@ -110,6 +115,16 @@ def send_whatsapp_reminder(phone_no: str, message: str, friend_name: str):
 # ================== MAIN EXECUTION ==================
 
 def main():
+    if not API_KEY:
+        logging.critical("SPLITWISE_API_KEY missing in .env")
+        return
+
+    # Load data from external JSON
+    phone_book = load_phone_book(FRIENDS_FILE)
+    if not phone_book:
+        logging.error("Phone book is empty. Exiting.")
+        return
+
     friends = get_splitwise_friends()
     
     if not friends:
@@ -124,22 +139,21 @@ def main():
             logging.info("Message limit reached. Stopping.")
             break
 
-        balances = friend.get("balance", [])
         first_name = (friend.get("first_name") or "").strip()
-        last_name = (friend.get("last_name") or "").strip()
+        name_key = first_name.lower()
         
         if not first_name:
             continue
 
         name_key = first_name.lower()
-        full_name = f"{first_name} {last_name}".strip()
+        balances = friend.get("balances", [])
 
         if name_key in sent_users:
             continue  # SECURITY: no duplicate reminders
 
-        phone_no = PHONE_BOOK.get(name_key)
+        phone_no = phone_book.get(name_key)
         if not phone_no:
-            logging.warning(f"No phone number for {full_name}.")
+            logging.warning(f"No phone number for {first_name}.")
             continue
         
         for balance in balances:
@@ -150,13 +164,13 @@ def main():
                 if amount > 0:
                     if phone_no:
                         message = generate_message(first_name, amount, currency)
-                        send_whatsapp_reminder(phone_no, message, full_name)
+                        send_whatsapp_reminder(phone_no, message, first_name)
                         
                         sent_users.add(name_key)
                         messages_sent += 1
                         break # Only one message per friend
                     else:
-                        logging.warning(f"No phone number mapped for {full_name}. Skipping.")
+                        logging.warning(f"No phone number mapped for {first_name}. Skipping.")
                 
             except Exception as e:
                 # This will now catch the error and tell you exactly what went wrong
