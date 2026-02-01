@@ -11,9 +11,11 @@
 
 -   **Real-time Balance Sync:** Fetches the most recent "You are owed" data directly from Splitwise.
 -   **Automated Messaging:** Uses `pywhatkit` to automate WhatsApp Web messaging.
+-   **JSON Data Management:** Keep your contact list separate from your code using a dedicated friends.json file.
+-   **Anti-Spam Protection:** Built-in rate limiting and message caps to ensure safe automation.
 -   **Smart Mapping:** Maps Splitwise names to phone numbers via a configurable dictionary.
 -   **Currency Aware:** Automatically detects and mentions the currency (CAD, USD, INR, etc.) of the debt.
--   **Robust Error Handling:** Includes logging and safety checks to prevent script crashes.
+-   **Privacy Focused:** Automatically masks phone numbers in console logs and keeps sensitive data out of the source code.
 
 ---
 
@@ -49,9 +51,9 @@ Before running this bot, ensure you have the following:
     SPLITWISE_API_KEY=your_actual_token_here
     ```
 
-4.  **Configure the Phone Book:**
-    Open `main.py` and update the `PHONE_BOOK` dictionary with your friends' first names and phone numbers (including country codes):
-    ```python
+4.  **Configure your friends list:**
+    Create `friends.json` file in the root directory: 
+    ```JSON
     PHONE_BOOK = {
         "Alex": "+13479537392",
         "john": "+1234567890"
@@ -75,8 +77,9 @@ python main.py
 
 ```text
 ├── main.py              # Main logic & API handling
+├── friends.json         # Contact mapping (Create this manually)
 ├── .env                 # API Keys (DO NOT UPLOAD TO GITHUB)
-├── .gitignore           # Tells GitHub which files to ignore
+├── .gitignore           # Protects sensitive files from being public
 ├── requirements.txt     # List of dependencies
 └── README.md            # Project documentation
 ```
