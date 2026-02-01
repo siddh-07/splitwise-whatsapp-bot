@@ -5,7 +5,7 @@ Description: Fetches outstanding balances from Splitwise API and sends
              automated WhatsApp reminders to friends who owe money.
 """
 
-import filecmp
+import urllib3
 import json
 import os
 import sys
@@ -171,6 +171,8 @@ def main():
                 logging.error(f"Error processing balance for {first_name}: {e}")
 
 if __name__ == "__main__":
+    urllib3.disable_warnings(urllib3.exceptions.NotOpenSSLWarning)
+    
     logging.info("Starting Splitwise Reminder Bot...")
     try:
         main()
