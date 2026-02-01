@@ -54,7 +54,7 @@ Before running this bot, ensure you have the following:
 4.  **Configure your friends list:**
     Create `friends.json` file in the root directory: 
     ```JSON
-    PHONE_BOOK = {
+    {
         "Alex": "+13479537392",
         "john": "+1234567890"
     }
