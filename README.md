@@ -49,6 +49,8 @@ Before running this bot, ensure you have the following:
     Create a `.env` file in the root directory:
     ```env
     SPLITWISE_API_KEY=your_actual_token_here
+    AUTHOR_NAME=your_name     
+    AUTHOR_EMAIL=your_emailID_where_you_want_to_deposit_money
     ```
 
 4.  **Configure your friends list:**
