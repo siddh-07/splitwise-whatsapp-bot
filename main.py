@@ -158,7 +158,7 @@ def main():
                 currency = balance.get("currency_code", "CAD")
                 
                 # Only look for a phone number if they owe you money (> 0)
-                if amount > 0.01: # Check for more than 1 cent
+                if amount > 0.01:
                     phone_no = phone_book.get(name_key)
                     
                     if phone_no:
