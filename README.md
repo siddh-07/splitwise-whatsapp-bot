@@ -36,7 +36,7 @@ Before running this bot, ensure you have the following:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/splitwise-whatsapp-bot.git
+    git clone https://github.com/siddh-07/splitwise-whatsapp-bot.git
     cd splitwise-whatsapp-bot
     ```
 
