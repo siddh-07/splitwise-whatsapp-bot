@@ -107,7 +107,7 @@ def send_whatsapp_reminder(phone_no: str, message: str, friend_name: str):
         pywhatkit.sendwhatmsg_instantly(
             phone_no=phone_no,
             message=message,
-            wait_time=15,  # Increased to 20s to 25s for better reliability on slower PCs
+            wait_time=20,  # Increased to 20s to 25s for better reliability on slower PCs
             tab_close=True,
             close_time=3
         )
