@@ -34,7 +34,7 @@ AUTHOR_NAME = os.getenv("AUTHOR_NAME")
 AUTHOR_EMAIL = os.getenv("AUTHOR_EMAIL")
 
 # SECURITY: Hard cap to prevent spam
-MAX_MESSAGES_PER_RUN = 5
+MAX_MESSAGES_PER_RUN = 10
 MESSAGE_DELAY_SECONDS = 20  # SECURITY: rate limiting
 
 # ================== VALIDATION ==================
